@@ -1,0 +1,31 @@
+# permissions for end users to edit udms.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: udm-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: udm-operator
+    app.kubernetes.io/part-of: udm-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: udm-editor-role
+rules:
+- apiGroups:
+  - fiveg.kt.com
+  resources:
+  - udms
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - fiveg.kt.com
+  resources:
+  - udms/status
+  verbs:
+  - get

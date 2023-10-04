@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: udm
+  namespace: 5gc-udm
+  annotations:
+    sidecar.istio.io/inject: "true"
+spec:
+  serviceName: "udm"
+  podManagementPolicy: Parallel
+  replicas: 1
+  selector:
+    matchLabels:
+      app: udm
+  template:
+    metadata:
+      labels:
+        app: udm
+        version: v1
+      annotations:
+        proxy.istio.io/config: 'concurrency: 0'
+        #sidecar.istio.io/proxyCPULimit : "4"
+        #sidecar.istio.io/proxyCPU : "100m"
+        #sidecar.istio.io/proxyMemoryLimit : "1Gi"
+        #sidecar.istio.io/proxyMemory : "128Mi"
+
+    spec:
+      shareProcessNamespace: true
+      containers:
+      - name: udm
+        image: private.el:5000/udm:latest
+        imagePullPolicy: Always
+        #resources:
+        #  limits:
+        #    memory: "2Gi"
+        ports:
+        - name: http
+          containerPort: 80
+        - name: https
+          containerPort: 443
+        env:
+        - name: TZ
+          value: Asia/Seoul
+        volumeMounts:
+        - name: pv-5g-udm-log
+          mountPath: /udm/log
+        - name: udm-commondb-config
+          mountPath: /usr/local/mariadb/odbc/odbc.ini
+          subPath: odbc.ini
+        - name: 5gc-license
+          mountPath: /lib/5gc-license
+
+        securityContext:
+          capabilities:
+            add: ["NET_ADMIN", "SYS_TIME", "NET_RAW"]
+
+      hostAliases:
+      - ip: "127.0.0.1"
+        hostnames:
+        - "udm1.asm0.ipc"
+        - "udm1.hsm0.ipc"
+        - "udm1.opm0.ipc"
+        - "svc-udm-mgmt.5gc-udm.svc.cluster.local"
+      - ip: "220.123.31.30"
+        hostnames:
+        - "cnfomp"
+
+      initContainers:
+      - name: change-ownership-udm
+        image: private.el:5000/udm:latest
+        imagePullPolicy: Always
+        command: ["/bin/sh", "-c"]
+        #args: ["/usr/bin/ln -s /udm/cfg/salog.cfg /udm/log/salog.cfg && /bin/chown -R 1000:1000 /udm/log"]
+        args: ["/usr/bin/cp /udm/cfg/salog.cfg /udm/log && /bin/chown -R 1000:1000 /udm/log"]
+        volumeMounts:
+        - name: pv-5g-udm-log
+          mountPath: /udm/log
+        - name: udm-commondb-config
+          mountPath: /usr/local/mariadb/odbc/odbc.ini
+          subPath: odbc.ini
+        - name: 5gc-license
+          mountPath: /lib/5gc-license
+
+      volumes:
+      - name: udm-commondb-config
+        configMap:
+          name: commondb-config
+      - name: 5gc-license
+        hostPath:
+          path: /lib/5gc-license
+
+  volumeClaimTemplates:
+  - metadata:
+      name: pv-5g-udm-log
+      namespace: 5gc-udm
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "hostpath"
+      resources:
+        requests:
+          storage: 10Gi
+

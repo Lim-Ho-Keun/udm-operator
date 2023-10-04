@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: commondb-config
+  namespace: 5gc-udm
+data:
+  odbc.ini: |
+    [Mariadb_Udmconf_master]
+    Driver=MariaDB ODBC 3.0 Driver
+    DATABASE=UDM_CFG
+    DESCRIPTION=MariaDB via ODBC
+    SERVER= commondb-sts-0.commondb.5gc-commondb-sts.svc.cluster.local
+    UID=udm
+    PASSWORD=udm
+    PORT=3306
+
+    [Mariadb_Udmconf_slave]
+    Driver=MariaDB ODBC 3.0 Driver
+    DATABASE=UDM_CFG
+    DESCRIPTION=MariaDB via ODBC
+    SERVER= commondb-sts-1.commondb.5gc-commondb-sts.svc.cluster.local
+    UID=udm
+    PASSWORD=udm
+    PORT=3306
+

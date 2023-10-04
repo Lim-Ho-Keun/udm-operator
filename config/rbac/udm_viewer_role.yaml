@@ -1,0 +1,27 @@
+# permissions for end users to view udms.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: udm-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: udm-operator
+    app.kubernetes.io/part-of: udm-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: udm-viewer-role
+rules:
+- apiGroups:
+  - fiveg.kt.com
+  resources:
+  - udms
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - fiveg.kt.com
+  resources:
+  - udms/status
+  verbs:
+  - get

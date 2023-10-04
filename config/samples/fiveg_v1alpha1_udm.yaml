@@ -1,0 +1,13 @@
+apiVersion: fiveg.kt.com/v1alpha1
+kind: UDM
+metadata:
+  labels:
+    app.kubernetes.io/name: udm
+    app.kubernetes.io/instance: udm-sample
+    app.kubernetes.io/part-of: udm-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: udm-operator
+  name: udm
+  namespace: 5gc-udm
+spec:
+  # TODO(user): Add fields here
